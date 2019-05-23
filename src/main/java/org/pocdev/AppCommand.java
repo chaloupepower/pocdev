@@ -23,13 +23,13 @@ import org.onosproject.cli.AbstractShellCommand;
  * Sample Apache Karaf CLI command
  */
 @Service
-@Command(scope = "onos", name = "sample",
+@Command(scope = "onos", name = "testPOC",
          description = "Sample Apache Karaf CLI command")
 public class AppCommand extends AbstractShellCommand {
 
     @Override
     protected void doExecute() {
-        print("TEST: %s", "hello world");
+        print("TEST: %s");
     }
 
 }
