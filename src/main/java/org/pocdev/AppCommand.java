@@ -29,7 +29,7 @@ public class AppCommand extends AbstractShellCommand {
 
     @Override
     protected void doExecute() {
-        print("TEST: %s");
+        print("TEST: POC");
     }
 
 }

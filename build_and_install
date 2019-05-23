@@ -1,0 +1,3 @@
+#!/bin/sh
+mvn clean install
+onos-app localhost reinstall! target/pocdev*.oar
