@@ -17,6 +17,8 @@ package org.pocdev;
 
 import com.google.common.collect.ImmutableSet;
 import org.onosproject.cfg.ComponentConfigService;
+import org.onosproject.core.ApplicationId;
+import org.onosproject.net.host.HostListener;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -42,6 +44,8 @@ import static org.onlab.util.Tools.get;
            })
 public class AppComponent implements SomeInterface {
 
+    private ApplicationId appId;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     /** Some configurable property. */
@@ -52,12 +56,14 @@ public class AppComponent implements SomeInterface {
 
     @Activate
     protected void activate() {
+        log.info("Starting POCapp...");
         cfgService.registerProperties(getClass());
         log.info("Started");
     }
 
     @Deactivate
     protected void deactivate() {
+        log.info("Stopping POCapp...");
         cfgService.unregisterProperties(getClass(), false);
         log.info("Stopped");
     }
