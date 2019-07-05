@@ -57,16 +57,18 @@ control device_recognition_table_control(inout headers_t hdr,
     }
 
     apply {
-        instanciate_flow_var();
-        if (device_recognition_table.apply().hit) {
-            read_session_status();
-            if (metadata.current_session_size<FEATURE_SESSION_LENGTH) {
+        @atomic {
+            instanciate_flow_var();
+            if (device_recognition_table.apply().hit) {
+                read_session_status();
+                if (metadata.current_session_size<FEATURE_SESSION_LENGTH) {
+                    extract_features();
+                }
+            }
+            else {
+                track_new();
                 extract_features();
             }
-        }
-        else {
-            track_new();
-            extract_features();
         }
      }
 }
