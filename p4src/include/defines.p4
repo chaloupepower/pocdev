@@ -1,19 +1,3 @@
-/*
- * Copyright 2017-present Open Networking Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #ifndef __DEFINES__
 #define __DEFINES__
 
@@ -23,6 +7,9 @@
 #define IP_VERSION_4 4w4
 #define IPV4_IHL_MIN 4w5
 #define MAX_PORTS 511
+#define FEATURE_SESSION_LENGTH 10
+#define MAX_DEVICES 254
+#define MAX_FLOWS 64516
 
 #ifndef _BOOL
 #define _BOOL bool
@@ -39,12 +26,15 @@ typedef bit<32> ip_address_t;
 typedef bit<16> l4_port_t;
 typedef bit<9>  port_t;
 typedef bit<16> next_hop_id_t;
+typedef bit<16> flow_id_t;
+typedef bit<8>  session_size_t;
+
+register<flow_id_t>(MAX_FLOWS) flow_list;
+register<session_size_t>(MAX_DEVICES*2) flow_session_size;
+register<flow_id_t>(1) flow_count;
+register<bit<32>>(MAX_DEVICES*2*FEATURE_SESSION_LENGTH) feature_timestamp;
+register<bit<32>>(MAX_DEVICES*2*FEATURE_SESSION_LENGTH) feature_packet_length;
 
 const port_t CPU_PORT = 255;
-
-typedef bit<8> MeterColor;
-const MeterColor MeterColor_GREEN = 8w0;
-const MeterColor MeterColor_YELLOW = 8w1;
-const MeterColor MeterColor_RED = 8w2;
 
 #endif

@@ -6,14 +6,10 @@
 #include "include/custom_headers.p4"
 #include "include/defines.p4"
 #include "include/parsers.p4"
-#include "include/actions.p4"
 #include "include/port_counters.p4"
-#include "include/port_meters.p4"
 #include "include/checksums.p4"
 #include "include/packet_io.p4"
 #include "include/table0.p4"
-#include "include/host_meter_table.p4"
-#include "include/device_recognition_registers.p4"
 #include "include/device_recognition_table.p4"
 
 //------------------------------------------------------------------------------
@@ -26,11 +22,9 @@ control ingress(inout headers_t hdr,
 
     apply {
         port_counters_ingress.apply(hdr, standard_metadata);
-        port_meters_ingress.apply(hdr, standard_metadata);
-        device_recognition_table_control.apply(hdr, standard_metadata);
         packetio_ingress.apply(hdr, standard_metadata);
+        device_recognition_table_control.apply(hdr, standard_metadata, local_metadata);
         table0_control.apply(hdr, local_metadata, standard_metadata);
-        host_meter_control.apply(hdr, local_metadata, standard_metadata);
      }
 }
 
@@ -44,7 +38,6 @@ control egress(inout headers_t hdr,
 
     apply {
         port_counters_egress.apply(hdr, standard_metadata);
-        port_meters_egress.apply(hdr, standard_metadata);
         packetio_egress.apply(hdr, standard_metadata);
     }
 }

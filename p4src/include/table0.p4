@@ -1,19 +1,3 @@
-/*
- * Copyright 2017-present Open Networking Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #ifndef __TABLE0__
 #define __TABLE0__
 
@@ -26,16 +10,11 @@ control table0_control(inout headers_t hdr,
 
     direct_counter(CounterType.packets_and_bytes) table0_counter;
 
-    action set_next_hop_id(next_hop_id_t next_hop_id) {
-        local_metadata.next_hop_id = next_hop_id;
-    }
-
-    action send_to_cpu() {
-        standard_metadata.egress_spec = CPU_PORT;
-    }
-
-    action set_egress_port(port_t port) {
+    action ipv4_forward(mac_t dst_addr, port_t port) {
         standard_metadata.egress_spec = port;
+        hdr.ethernet.src_addr = hdr.ethernet.dst_addr;
+        hdr.ethernet.dst_addr = dst_addr;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     action drop() {
@@ -55,12 +34,11 @@ control table0_control(inout headers_t hdr,
             local_metadata.l4_dst_port     : ternary;
         }
         actions = {
-            set_egress_port;
-            send_to_cpu;
-            set_next_hop_id;
+            ipv4_forward;
+            NoAction;
             drop;
         }
-        const default_action = drop();
+        const default_action = drop;
         counters = table0_counter;
     }
 
