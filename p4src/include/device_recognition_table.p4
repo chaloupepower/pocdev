@@ -59,12 +59,16 @@ control device_recognition_table_control(inout headers_t hdr,
     apply {
         @atomic {
             instanciate_flow_var();
+            //Check if the flow is known ie matches a table entry
             if (device_recognition_table.apply().hit) {
                 read_session_status();
+                //If the current flow features vector is smaller than the expected vector size,
+                //extract the packet features
                 if (metadata.current_session_size<FEATURE_SESSION_LENGTH) {
                     extract_features();
                 }
             }
+            //If the flow is unknown, start tracking it and extracting its features
             else {
                 track_new();
                 extract_features();
