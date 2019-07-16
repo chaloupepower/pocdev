@@ -1,0 +1,11 @@
+Ci-joint mon code pour la détection du type d'objet. Le model prend en entrée la taille des 10 premiers paquets envoyés et reçu ainsi que les temps inter-arrivés correspondants.
+
+RF_classifier.ipynb peut être ouvert avec jupyter notebook et contient tous les détails de comment a été entraîné le model.
+
+my_model.sav est une sauvegarde du model déjà entraîné. Le model se charge de normaliser (il faut donc avoir par exemple la taille brut des paquets en octets et le temps inter-arrivé en seconde) et de prédire ensuite la classe.
+
+my_model.py est un script python qui fait appel à my_model.sav pour prédire la classe (le type d'objet) lorsque en lui donne en entrée un fichier csv qui contient des flux bidirectionnels. Tu peux retrouver la liste des features et leur ordre dans RF_classifier.ipynb. le script doit être exécuté dans un environnement où les librairies jupyter matplotlib numpy pandas scipy scikit-learn ont été préalablement installés. Moi par exemple je dois taper "../../env/bin/python3 my_model.py -i sample_test_set.csv" le fichier csv contenant les données à tester doit être indiqué après "-i". Les classes prédit s'affichent à l'écran et sont enregistrés dans un fichier "predicted_classes", tu peux modifier le nom du fichier de sortie avec l'argument "-o".
+
+sample_test_set.csv peux être utilisé pour tester si ça marche. Tu dois obtenir les classes [0 3 2 1 0 3 2 1 0 3] (tu peux voir l'objet qui correspond à chaque numéro dans RF_classifier.ipynb).
+
+Je t'ai aussi joint les jeux de données utilisés pour entraîner le model car apparemment si on utilise pas les même versions de librairies le model que j'aurai entraîné de mon côté ne fonctionnera pas chez toi. Tu dois juste exécuter les différents étapes contenu dans RF_classifier.ipynb sur jupyter pour réentrainer le model. Tu trouveras beaucoup d'information utile dans ce fichier. 
