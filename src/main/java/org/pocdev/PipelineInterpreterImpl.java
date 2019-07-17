@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.onosproject.pocdev.pipeconf;
+package org.onosproject.pocdev;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -60,7 +60,7 @@ import static org.onosproject.net.flow.instructions.Instruction.Type.OUTPUT;
 import static org.onosproject.net.pi.model.PiPacketOperationType.PACKET_OUT;
 
 /**
- * Implementation of a pipeline interpreter the POCDEV
+ * Implementation of a pipeline interpreter for the  Poc Dev app
  */
 public final class PipelineInterpreterImpl
         extends AbstractHandlerBehaviour
@@ -69,7 +69,8 @@ public final class PipelineInterpreterImpl
     private static final String DOT = ".";
     private static final String HDR = "hdr";
     private static final String C_INGRESS = "c_ingress";
-    private static final String T_L2_FWD = "t_l2_fwd";
+    private static final String T0_FWD = "table0";
+    private static final String DEVICE_RECOGNITION = "device_recognition_table";
     private static final String EGRESS_PORT = "egress_port";
     private static final String INGRESS_PORT = "ingress_port";
     private static final String ETHERNET = "ethernet";
@@ -85,8 +86,11 @@ public final class PipelineInterpreterImpl
     private static final PiMatchFieldId ETH_TYPE_ID =
             PiMatchFieldId.of(HDR + DOT + ETHERNET + DOT + "ether_type");
 
-    private static final PiTableId TABLE_L2_FWD_ID =
-            PiTableId.of(C_INGRESS + DOT + T_L2_FWD);
+    private static final PiTableId TABLE0_FWD_ID =
+            PiTableId.of(C_INGRESS + DOT + T0_FWD);
+
+    private static final PiTableId TABLE_DEV_RECO_ID =
+            PiTableId.of(C_INGRESS + DOT + DEVICE_RECOGNITION);
 
     private static final PiActionId ACT_ID_NOP =
             PiActionId.of("NoAction");
@@ -98,9 +102,14 @@ public final class PipelineInterpreterImpl
     private static final PiActionParamId ACT_PARAM_ID_PORT =
             PiActionParamId.of("port");
 
-    private static final Map<Integer, PiTableId> TABLE_MAP =
+    private static final Map<Integer, PiTableId> TABLE0_MAP =
             new ImmutableMap.Builder<Integer, PiTableId>()
-                    .put(0, TABLE_L2_FWD_ID)
+                    .put(0, TABLE0_FWD_ID)
+                    .build();
+
+    private static final Map<Integer, PiTableId> TABLE_DEV_RECO_MAP =
+            new ImmutableMap.Builder<Integer, PiTableId>()
+                    .put(0, TABLE_DEV_RECO_ID)
                     .build();
 
     private static final Map<Criterion.Type, PiMatchFieldId> CRITERION_MAP =
@@ -125,24 +134,20 @@ public final class PipelineInterpreterImpl
     public PiAction mapTreatment(TrafficTreatment treatment, PiTableId piTableId)
             throws PiInterpreterException {
 
-        if (piTableId != TABLE_L2_FWD_ID) {
+        if (piTableId != TABLE0_FWD_ID) {
             throw new PiInterpreterException(
-                    "Can map treatments only for 't_l2_fwd' table");
+                    "Can map treatments only for 'T0_FWD' table");
         }
 
         if (treatment.allInstructions().size() == 0) {
-            // 0 instructions means "NoAction"
             return PiAction.builder().withId(ACT_ID_NOP).build();
         } else if (treatment.allInstructions().size() > 1) {
-            // We understand treatments with only 1 instruction.
             throw new PiInterpreterException("Treatment has multiple instructions");
         }
 
-        // Get the first and only instruction.
         Instruction instruction = treatment.allInstructions().get(0);
 
         if (instruction.type() != OUTPUT) {
-            // We can map only instructions of type OUTPUT.
             throw new PiInterpreterException(format(
                     "Instruction of type '%s' not supported", instruction.type()));
         }
@@ -171,7 +176,6 @@ public final class PipelineInterpreterImpl
 
         TrafficTreatment treatment = packet.treatment();
 
-        // We support only packet-out with OUTPUT instructions.
         if (treatment.allInstructions().size() != 1 &&
                 treatment.allInstructions().get(0).type() != OUTPUT) {
             throw new PiInterpreterException(
@@ -185,8 +189,6 @@ public final class PipelineInterpreterImpl
         if (!port.isLogical()) {
             piPacketOps.add(createPiPacketOp(packet.data(), port.toLong()));
         } else if (port.equals(FLOOD)) {
-            // Since mytunnel.p4 does not support flooding, we create a packet
-            // operation for each switch port.
             DeviceService deviceService = handler().get(DeviceService.class);
             DeviceId deviceId = packet.sendThrough();
             for (Port p : deviceService.getPorts(deviceId)) {
@@ -203,8 +205,6 @@ public final class PipelineInterpreterImpl
     @Override
     public InboundPacket mapInboundPacket(PiPacketOperation packetIn, DeviceId deviceId)
             throws PiInterpreterException {
-        // We assume that the packet is ethernet, which is fine since mytunnel.p4
-        // can deparse only ethernet packets.
         Ethernet ethPkt;
 
         try {
@@ -214,7 +214,6 @@ public final class PipelineInterpreterImpl
             throw new PiInterpreterException(dex.getMessage());
         }
 
-        // Returns the ingress port packet metadata.
         Optional<PiPacketMetadata> packetMetadata = packetIn.metadatas().stream()
                 .filter(metadata -> metadata.id().toString().equals(INGRESS_PORT))
                 .findFirst();
