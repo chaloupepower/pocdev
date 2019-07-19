@@ -37,7 +37,7 @@ import static org.onlab.util.Tools.get;
 @Component(immediate = true,
 service = {SomeInterface.class},
 enabled = true
-})
+)
 public class AppComponent implements SomeInterface {
 
   private ApplicationId appId;
